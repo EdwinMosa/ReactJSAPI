@@ -30,13 +30,11 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new (sqlDataSource))
             {
                 sqlConnection.Open();
-                using(SqlCommand sqlCommand = new (query, sqlConnection))
-                {
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult(table);
         }
@@ -54,14 +52,12 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlCommand.Parameters.AddWithValue("@DepartmentName", department.DepartmentName);
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@DepartmentName", department.DepartmentName);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult("Added Successfully");
         }
@@ -79,15 +75,13 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlCommand.Parameters.AddWithValue("@DepartmentId", department.DepartmentId);
-                    sqlCommand.Parameters.AddWithValue("@DepartmentName", department.DepartmentName);
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@DepartmentId", department.DepartmentId);
+                sqlCommand.Parameters.AddWithValue("@DepartmentName", department.DepartmentName);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult("Updated Successfully");
         }
@@ -105,14 +99,12 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlCommand.Parameters.AddWithValue("@DepartmentId", id);
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@DepartmentId", id);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult("Deleted Successfully");
         }

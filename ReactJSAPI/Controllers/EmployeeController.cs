@@ -8,6 +8,8 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace ReactJSAPI.Controllers
 {
@@ -16,10 +18,12 @@ namespace ReactJSAPI.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
-        public EmployeeController(IConfiguration configuration)
+        public EmployeeController(IConfiguration configuration, IWebHostEnvironment env)
         {
             _configuration = configuration;
+            _env = env;
         }
 
         [HttpGet]
@@ -35,13 +39,11 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult(table);
         }
@@ -59,17 +61,15 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlCommand.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
-                    sqlCommand.Parameters.AddWithValue("@Department", employee.Department);
-                    sqlCommand.Parameters.AddWithValue("@DateOfJoining", employee.DateOfJoining);
-                    sqlCommand.Parameters.AddWithValue("@PhotoFileName", employee.PhotoFileName);
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
+                sqlCommand.Parameters.AddWithValue("@Department", employee.Department);
+                sqlCommand.Parameters.AddWithValue("@DateOfJoining", employee.DateOfJoining);
+                sqlCommand.Parameters.AddWithValue("@PhotoFileName", employee.PhotoFileName);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult("Added Successfully");
         }
@@ -89,18 +89,16 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlCommand.Parameters.AddWithValue("@EmployeeId", employee.EmployeeId);
-                    sqlCommand.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
-                    sqlCommand.Parameters.AddWithValue("@Department", employee.Department);
-                    sqlCommand.Parameters.AddWithValue("@DateOfJoining", employee.DateOfJoining);
-                    sqlCommand.Parameters.AddWithValue("@PhotoFileName", employee.PhotoFileName);
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@EmployeeId", employee.EmployeeId);
+                sqlCommand.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
+                sqlCommand.Parameters.AddWithValue("@Department", employee.Department);
+                sqlCommand.Parameters.AddWithValue("@DateOfJoining", employee.DateOfJoining);
+                sqlCommand.Parameters.AddWithValue("@PhotoFileName", employee.PhotoFileName);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult("Updated Successfully");
         }
@@ -118,16 +116,38 @@ namespace ReactJSAPI.Controllers
             using (SqlConnection sqlConnection = new(sqlDataSource))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new(query, sqlConnection))
-                {
-                    sqlCommand.Parameters.AddWithValue("@EmployeeId", id);
-                    sqlDataReader = sqlCommand.ExecuteReader();
-                    table.Load(sqlDataReader);
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
+                using SqlCommand sqlCommand = new(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@EmployeeId", id);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                table.Load(sqlDataReader);
+                sqlDataReader.Close();
+                sqlConnection.Close();
             }
             return new JsonResult("Deleted Successfully");
+        }
+
+
+        [Route("SaveFile")]
+        [HttpPost]
+        public JsonResult SaveFile()
+        {
+            try
+            {
+                var httpRequest = Request.Form;
+                var postedFile = httpRequest.Files[0];
+                string filename = postedFile.FileName;
+                var physicalPath = _env.ContentRootPath + "/Photos/" + filename;
+
+                using(var stream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    postedFile.CopyTo(stream);
+                }
+                return new JsonResult(filename);
+            }
+            catch (Exception)
+            {
+                return new JsonResult("anonymous.jpg");
+            }
         }
     }
 }
